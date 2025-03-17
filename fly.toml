@@ -1,0 +1,24 @@
+# fly.toml app configuration file for french-voyage-backend
+# Optimized for free-tier usage
+
+app = "french-voyage-backend"
+primary_region = "mad"  # Madrid, España (elige la más cercana a tus usuarios)
+
+[build]
+  image = "node:18"  # Usa una imagen ligera de Node.js
+
+[env]
+  PORT = "3000"  # Fly.io usará este puerto para tu backend
+
+[http_service]
+  internal_port = 3000  # Puerto en el que corre tu backend
+  force_https = true  # Forzar HTTPS
+  auto_stop_machines = "stop"  # Apagar instancias cuando no haya tráfico (gratis)
+  auto_start_machines = true  # Encender instancias automáticamente con tráfico
+  min_machines_running = 0  # Mantener en 0 para no gastar créditos si no hay uso
+  processes = ["app"]
+
+[[vm]]
+  memory = "256mb"  # Mantener el consumo bajo para seguir en el plan gratuito
+  cpu_kind = "shared"
+  cpus = 1
