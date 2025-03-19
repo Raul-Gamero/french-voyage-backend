@@ -16,7 +16,11 @@ export const registerUser = async (req: Request, res: Response) => {
         const userExists = await User.findOne({ email });
         if (userExists) return res.status(400).json({ message: "El usuario ya existe" });
 
-        const user = await User.create({ firstName, lastName, phone, email, password });
+        // Asegurar que el password no es undefined
+        if (!password) return res.status(400).json({ message: "La contraseña es obligatoria" });
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await User.create({ firstName, lastName, phone, email, password: hashedPassword });
 
         const token = generateToken(user._id.toString(), user.role);
 
@@ -32,6 +36,7 @@ export const registerUser = async (req: Request, res: Response) => {
             token
         });
     } catch (error) {
+        console.error("Error en registro:", error);
         res.status(500).json({ message: "Error al registrar usuario", error });
     }
 };
@@ -45,13 +50,11 @@ export const loginUser = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     try {
-        // Verificar si el usuario existe
         const user = await User.findOne({ email });
-        if (!user || !(await bcrypt.compare(password, user.password))) {
+        if (!user || !user.password || !(await bcrypt.compare(password, user.password))) {
             return res.status(401).json({ message: "Credenciales incorrectas" });
         }
 
-        // Generar token
         const token = generateToken(user._id.toString(), user.role);
 
         res.status(200).json({
@@ -66,6 +69,7 @@ export const loginUser = async (req: Request, res: Response) => {
             token
         });
     } catch (error) {
+        console.error("Error en login:", error);
         res.status(500).json({ message: "Error en login", error });
     }
 };
@@ -77,7 +81,9 @@ export const loginUser = async (req: Request, res: Response) => {
  */
 export const getUserProfile = async (req: Request, res: Response) => {
     try {
-        const user = await User.findById(req.user?.id).select("-password");
+        if (!req.user) return res.status(401).json({ message: "No autorizado" });
+
+        const user = await User.findById(req.user.id).select("-password");
 
         if (!user) {
             return res.status(404).json({ message: "Usuario no encontrado" });
@@ -85,6 +91,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
 
         res.status(200).json(user);
     } catch (error) {
+        console.error("Error al obtener el perfil:", error);
         res.status(500).json({ message: "Error al obtener el perfil", error });
     }
 };
@@ -96,8 +103,9 @@ export const getUserProfile = async (req: Request, res: Response) => {
  */
 export const updateUserProfile = async (req: Request, res: Response) => {
     try {
-        const user = await User.findById(req.user?.id);
+        if (!req.user) return res.status(401).json({ message: "No autorizado" });
 
+        const user = await User.findById(req.user.id);
         if (!user) {
             return res.status(404).json({ message: "Usuario no encontrado" });
         }
@@ -124,6 +132,7 @@ export const updateUserProfile = async (req: Request, res: Response) => {
             }
         });
     } catch (error) {
+        console.error("Error al actualizar el perfil:", error);
         res.status(500).json({ message: "Error al actualizar el perfil", error });
     }
 };
