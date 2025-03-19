@@ -2,23 +2,23 @@
 # Optimized for free-tier usage
 
 app = "french-voyage-backend"
-primary_region = "mad"  # Madrid, España (elige la más cercana a tus usuarios)
+primary_region = "mad"  
 
 [build]
-  image = "node:18"  # Usa una imagen ligera de Node.js
+  image = "node:18" 
 
 [env]
-  PORT = "3000"  # Fly.io usará este puerto para tu backend
+  PORT = "3000"  
 
 [http_service]
-  internal_port = 3000  # Puerto en el que corre tu backend
-  force_https = true  # Forzar HTTPS
-  auto_stop_machines = "stop"  # Apagar instancias cuando no haya tráfico (gratis)
-  auto_start_machines = true  # Encender instancias automáticamente con tráfico
-  min_machines_running = 0  # Mantener en 0 para no gastar créditos si no hay uso
+  internal_port = 3000 
+  force_https = true 
+  auto_stop_machines = "stop"  
+  auto_start_machines = true  
+  min_machines_running = 1 
   processes = ["app"]
 
 [[vm]]
-  memory = "256mb"  # Mantener el consumo bajo para seguir en el plan gratuito
+  memory = "256mb" 
   cpu_kind = "shared"
   cpus = 1
