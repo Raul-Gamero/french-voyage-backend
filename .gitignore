@@ -40,3 +40,6 @@ Thumbs.db
 # PM2 process files
 pm2-runtime.log
 pm2.log
+
+
+fly.toml
